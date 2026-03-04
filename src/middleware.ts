@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const AUTH_COOKIE = '114korea-auth'
+const AUTH_COOKIE = 'k114-auth'
 
 // 인증 필요 경로
 const PROTECTED_PATHS = ['/dashboard']

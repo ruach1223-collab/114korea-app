@@ -5,7 +5,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import type { Company } from '@/types/job'
 import type { AuthUser } from '@/types/auth'
 
-export const AUTH_COOKIE_NAME = '114korea-auth'
+export const AUTH_COOKIE_NAME = 'k114-auth'
 
 const getJwtSecret = () =>
   new TextEncoder().encode(process.env.JWT_SECRET ?? 'default-jwt-secret-change-in-production!!')

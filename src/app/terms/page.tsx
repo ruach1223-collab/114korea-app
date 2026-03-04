@@ -12,7 +12,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-gray-900">제1조 (목적)</h2>
           <p>
-            이 약관은 114Korea(이하 &quot;서비스&quot;)가 제공하는 구인구직 정보 서비스의 이용에 관한
+            이 약관은 K114(이하 &quot;서비스&quot;)가 제공하는 구인구직 정보 서비스의 이용에 관한
             기본 사항을 규정함을 목적으로 합니다.
           </p>
         </section>

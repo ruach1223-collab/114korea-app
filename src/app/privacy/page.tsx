@@ -52,7 +52,7 @@ export default function PrivacyPage() {
           <p>
             개인정보 관련 문의사항은 아래로 연락해주세요.
           </p>
-          <p>이메일: admin@114korea.com</p>
+          <p>이메일: admin@k114.com</p>
         </section>
 
         <p className="text-xs text-gray-400 mt-8">시행일: 2026년 3월 1일</p>

@@ -4,20 +4,30 @@ import { INDUSTRY_LABELS, formatSalary, formatTimeAgo } from '@/features/jobs/ut
 
 type JobListItemProps = {
   job: JobPostCard
+  highlight?: boolean
 }
 
 // 카페 게시판 스타일 줄 리스트 - 촘촘한 버전
-export function JobListItem({ job }: JobListItemProps) {
+export function JobListItem({ job, highlight }: JobListItemProps) {
   return (
     <Link href={`/jobs/${job.id}`} className="block">
-      <div className="flex items-center gap-2 px-2 py-1.5 border-b border-gray-100 hover:bg-blue-50/40 transition-colors text-[13px] leading-tight">
+      <div className={`flex items-center gap-2 px-2 py-1.5 border-b transition-colors text-[13px] leading-tight ${
+        highlight
+          ? 'bg-amber-50/60 border-amber-100 hover:bg-amber-50'
+          : 'border-gray-100 hover:bg-blue-50/40'
+      }`}>
+        {/* 추천 뱃지 */}
+        {highlight && (
+          <span className="text-[10px] font-bold text-amber-600 w-6 shrink-0 text-center">추천</span>
+        )}
+
         {/* 업종 */}
         <span className="text-[11px] text-gray-400 w-14 shrink-0 text-center hidden sm:block">
           {INDUSTRY_LABELS[job.industry]}
         </span>
 
         {/* 제목 */}
-        <span className="flex-1 min-w-0 text-gray-800 truncate">
+        <span className={`flex-1 min-w-0 truncate ${highlight ? 'text-gray-900 font-medium' : 'text-gray-800'}`}>
           {job.title}
         </span>
 

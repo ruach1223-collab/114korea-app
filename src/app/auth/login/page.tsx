@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">업체 로그인</h1>
         <p className="text-sm text-gray-500 mt-2">
-          114Korea에 등록된 업체 계정으로 로그인하세요
+          K114에 등록된 업체 계정으로 로그인하세요
         </p>
       </div>
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
           <br />
           대기 업체: pending@xyz.com / test1234
           <br />
-          관리자: admin@114korea.com / admin1234
+          관리자: admin@k114.com / admin1234
         </p>
       </div>
     </div>

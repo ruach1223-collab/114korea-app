@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server'
+import { isCompanySubscribed } from '@/lib/subscription'
 import type { JobPost, JobPostCard, Industry, SalaryType, JobTag } from '@/types/job'
 
 // === 회사명 조회 (내부 헬퍼) ===
@@ -173,6 +174,9 @@ export async function createJob(
   const supabase = createServerClient()
   const expiresAt = new Date(Date.now() + 30 * 86400000)
 
+  // 구독 업체면 자동으로 VIP 적용
+  const vip = await isCompanySubscribed(companyId)
+
   const { data, error } = await supabase
     .from('jobs')
     .insert({
@@ -191,7 +195,7 @@ export async function createJob(
       description: input.description,
       contact_phone: input.contact_phone,
       contact_kakao: input.contact_kakao ?? '',
-      is_vip: false,
+      is_vip: vip,
       status: 'pending',
       view_count: 0,
       source: 'organic',
@@ -281,12 +285,13 @@ export async function updateJobAdmin(id: string, updates: { status?: string; is_
 
 // === 관리자: 전체 공고 목록 ===
 
-export async function getAllJobs(filters: { status?: string; vip?: string }) {
+export async function getAllJobs(filters: { status?: string; vip?: string; source?: string }) {
   const supabase = createServerClient()
   let query = supabase.from('jobs').select('*')
 
   if (filters.status) query = query.eq('status', filters.status)
   if (filters.vip === 'true') query = query.eq('is_vip', true)
+  if (filters.source) query = query.eq('source', filters.source)
 
   const { data } = await query.order('created_at', { ascending: false })
 
@@ -303,7 +308,7 @@ export async function getAllJobs(filters: { status?: string; vip?: string }) {
 
 export async function getJobStats() {
   const supabase = createServerClient()
-  const { data } = await supabase.from('jobs').select('status, is_vip, view_count')
+  const { data } = await supabase.from('jobs').select('status, is_vip, view_count, source')
 
   const jobs = data ?? []
   return {
@@ -313,6 +318,7 @@ export async function getJobStats() {
     hidden: jobs.filter((j: { status: string }) => j.status === 'hidden').length,
     expired: jobs.filter((j: { status: string }) => j.status === 'expired').length,
     vip: jobs.filter((j: { is_vip: boolean }) => j.is_vip).length,
+    crawled: jobs.filter((j: { source: string }) => j.source === 'crawled').length,
     totalViews: jobs.reduce((sum: number, j: { view_count: number }) => sum + j.view_count, 0),
   }
 }
@@ -324,6 +330,10 @@ export async function getHomePageData() {
   const now = new Date().toISOString()
   const fields = 'id, title, company_id, industry, region_city, region_district, salary_type, salary_amount, tags, is_vip, created_at'
 
+  // VIP 공고 + 부족분 채우기 위해 일반 공고를 넉넉히 가져옴
+  const PREMIUM_COUNT = 8
+  const RECENT_COUNT = 30
+
   const [vipResult, recentResult] = await Promise.all([
     supabase
       .from('jobs')
@@ -332,7 +342,7 @@ export async function getHomePageData() {
       .eq('is_vip', true)
       .gt('expires_at', now)
       .order('created_at', { ascending: false })
-      .limit(4),
+      .limit(PREMIUM_COUNT),
     supabase
       .from('jobs')
       .select(fields)
@@ -340,10 +350,22 @@ export async function getHomePageData() {
       .eq('is_vip', false)
       .gt('expires_at', now)
       .order('created_at', { ascending: false })
-      .limit(20),
+      .limit(PREMIUM_COUNT + RECENT_COUNT),
   ])
 
-  const allJobs = [...(vipResult.data ?? []), ...(recentResult.data ?? [])]
+  const vipRaw = vipResult.data ?? []
+  const recentRaw = recentResult.data ?? []
+
+  // VIP가 8개 미만이면 일반 공고에서 최신순으로 채움
+  const fillCount = PREMIUM_COUNT - vipRaw.length
+  const filledVip = fillCount > 0
+    ? [...vipRaw, ...recentRaw.slice(0, fillCount)]
+    : vipRaw
+  const remainRecent = fillCount > 0
+    ? recentRaw.slice(fillCount, fillCount + RECENT_COUNT)
+    : recentRaw.slice(0, RECENT_COUNT)
+
+  const allJobs = [...filledVip, ...remainRecent]
   const companyIds = [...new Set(allJobs.map((j: { company_id: string }) => j.company_id))]
   const companyNames = await getCompanyNames(companyIds)
 
@@ -362,7 +384,7 @@ export async function getHomePageData() {
   })
 
   return {
-    vipJobs: (vipResult.data ?? []).map(mapToCard),
-    recentJobs: (recentResult.data ?? []).map(mapToCard),
+    vipJobs: filledVip.map(mapToCard),
+    recentJobs: remainRecent.map(mapToCard),
   }
 }

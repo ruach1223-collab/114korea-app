@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, isLoading: false }),
     }),
     {
-      name: '114korea-auth-store',
+      name: 'k114-auth-store',
     }
   )
 )

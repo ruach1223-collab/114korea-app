@@ -1,4 +1,4 @@
--- 114Korea Supabase 스키마
+-- K114 Supabase 스키마
 -- Supabase SQL Editor에서 실행하세요
 
 -- pgcrypto 활성화 (비밀번호 해싱용)
@@ -73,6 +73,7 @@ CREATE INDEX idx_jobs_region_city ON jobs(region_city);
 CREATE INDEX idx_jobs_is_vip ON jobs(is_vip);
 CREATE INDEX idx_jobs_created_at ON jobs(created_at DESC);
 CREATE INDEX idx_companies_status ON companies(status);
+CREATE INDEX idx_jobs_source_url ON jobs(source_url) WHERE source_url IS NOT NULL;
 
 -- ============================================
 -- 3. 조회수 증가 함수 (atomic)
@@ -87,9 +88,9 @@ $$ LANGUAGE sql;
 -- 4. 초기 데이터
 -- ============================================
 
--- 관리자 계정 (admin@114korea.com / admin1234)
+-- 관리자 계정 (admin@k114.com / admin1234)
 INSERT INTO admins (email, password_hash, role) VALUES
-  ('admin@114korea.com', crypt('admin1234', gen_salt('bf', 10)), 'super_admin');
+  ('admin@k114.com', crypt('admin1234', gen_salt('bf', 10)), 'super_admin');
 
 -- 테스트 업체 1: 승인됨 (test@abc.com / test1234)
 INSERT INTO companies (id, email, password_hash, company_name, biz_number, rep_name, phone, address, status) VALUES
@@ -100,6 +101,11 @@ INSERT INTO companies (id, email, password_hash, company_name, biz_number, rep_n
 INSERT INTO companies (id, email, password_hash, company_name, biz_number, rep_name, phone, address, status) VALUES
   ('c0000002-0000-0000-0000-000000000002', 'pending@xyz.com', crypt('test1234', gen_salt('bf', 10)),
    'XYZ파견', '987-65-43210', '김철수', '032-9876-5432', '인천시 남동구 논현로 456', 'pending');
+
+-- 크롤링 공고용 시스템 업체 (모든 크롤링 공고가 이 업체에 소속)
+INSERT INTO companies (id, email, password_hash, company_name, biz_number, rep_name, phone, address, status) VALUES
+  ('c0000000-0000-4000-a000-000000000000', 'crawl@system.k114.com', crypt('no-login', gen_salt('bf', 10)),
+   'K114 외부수집', '000-00-00000', '시스템', '000-0000-0000', '-', 'approved');
 
 -- 추가 테스트 업체 (공고 seed 데이터용)
 INSERT INTO companies (id, email, password_hash, company_name, biz_number, rep_name, phone, address, status) VALUES
@@ -165,7 +171,51 @@ INSERT INTO jobs (company_id, title, industry, region_city, region_district, sal
    '041-0000-0000', '', FALSE, 'active', 22, 'organic', NOW() + INTERVAL '22 days');
 
 -- ============================================
--- 5. RLS 비활성화 (자체 인증 사용, API Route에서 권한 체크)
+-- 5. 구독 관련 테이블
+-- ============================================
+
+-- 구독 테이블
+CREATE TABLE subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  billing_key TEXT NOT NULL,
+  amount INTEGER NOT NULL DEFAULT 100000,
+  status TEXT NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'cancelled', 'expired')),
+  period_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  period_end TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '30 days',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT uq_subscriptions_company UNIQUE (company_id)
+);
+
+-- 결제 내역 테이블
+CREATE TABLE payments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+  payment_id TEXT NOT NULL,
+  amount INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'paid'
+    CHECK (status IN ('paid', 'failed', 'refunded')),
+  paid_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_subscriptions_company_id ON subscriptions(company_id);
+CREATE INDEX idx_subscriptions_status ON subscriptions(status);
+CREATE INDEX idx_subscriptions_period_end ON subscriptions(period_end);
+CREATE INDEX idx_payments_subscription_id ON payments(subscription_id);
+
+-- 업체 공고 is_vip 일괄 변경 RPC 함수
+CREATE OR REPLACE FUNCTION sync_vip_by_company(target_company_id UUID, vip_status BOOLEAN)
+RETURNS VOID AS $$
+  UPDATE jobs
+  SET is_vip = vip_status
+  WHERE company_id = target_company_id
+    AND status = 'active';
+$$ LANGUAGE sql;
+
+-- ============================================
+-- 6. RLS (자체 인증 사용, API Route에서 권한 체크)
 -- ============================================
 
 ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
@@ -176,3 +226,8 @@ ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all_companies" ON companies FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_admins" ON admins FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_jobs" ON jobs FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_subscriptions" ON subscriptions FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_payments" ON payments FOR ALL USING (true) WITH CHECK (true);

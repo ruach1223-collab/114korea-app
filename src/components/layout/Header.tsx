@@ -26,7 +26,7 @@ export function Header() {
         <div className="flex items-center justify-between h-14">
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-blue-600">114Korea</span>
+            <span className="text-xl font-bold text-blue-600">K114</span>
           </Link>
 
           {/* 데스크탑 메뉴 */}

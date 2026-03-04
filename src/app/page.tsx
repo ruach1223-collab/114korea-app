@@ -17,7 +17,7 @@ export default async function HomePage() {
       <section className="bg-blue-600 text-white py-10 md:py-16">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h1 className="text-2xl md:text-4xl font-bold mb-3">
-            안전한 일자리, 114Korea에서 찾으세요
+            안전한 일자리, K114에서 찾으세요
           </h1>
           <p className="text-blue-100 text-sm md:text-base mb-6">
             검증된 아웃소싱 업체의 구인정보를 무료로 확인하세요
@@ -59,9 +59,9 @@ export default async function HomePage() {
               <span className="px-2 py-0.5 text-xs font-bold bg-amber-400 text-amber-900 rounded">PREMIUM</span>
               <h2 className="text-sm font-bold text-gray-700">프리미엄 채용정보</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {vipJobs.map((job) => (
-                <JobCard key={job.id} job={job} />
+                <JobCard key={job.id} job={job} compact />
               ))}
             </div>
           </section>
@@ -95,8 +95,8 @@ export default async function HomePage() {
 
           {/* 줄 리스트 */}
           <div className="bg-white border-b border-gray-200">
-            {recentJobs.map((job) => (
-              <JobListItem key={job.id} job={job} />
+            {recentJobs.map((job, index) => (
+              <JobListItem key={job.id} job={job} highlight={index < 10} />
             ))}
           </div>
 

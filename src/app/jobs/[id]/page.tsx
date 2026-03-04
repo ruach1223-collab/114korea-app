@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: job.title,
     description: `${companyName} | ${job.region_city} ${job.region_district} | ${salary} | ${INDUSTRY_LABELS[job.industry]}`,
     openGraph: {
-      title: `${job.title} - 114Korea`,
+      title: `${job.title} - K114`,
       description: `${companyName} · ${salary} · ${job.region_city}`,
     },
   }
@@ -76,9 +76,17 @@ export default async function JobDetailPage({ params }: PageProps) {
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">{job.title}</h1>
         </div>
         <p className="text-sm text-gray-500">
-          {companyName}
-          <span className="mx-1">·</span>
-          <Badge variant="success">검증업체</Badge>
+          {job.source === 'crawled' ? (
+            <>
+              <Badge variant="default">외부수집</Badge>
+            </>
+          ) : (
+            <>
+              {companyName}
+              <span className="mx-1">·</span>
+              <Badge variant="success">검증업체</Badge>
+            </>
+          )}
         </p>
       </div>
 
@@ -137,6 +145,18 @@ export default async function JobDetailPage({ params }: PageProps) {
           <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">
             {job.description}
           </pre>
+          {job.source === 'crawled' && job.source_url && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <a
+                href={job.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                전체 내용은 원문에서 확인 →
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -144,16 +164,46 @@ export default async function JobDetailPage({ params }: PageProps) {
       <div className="mb-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-2">업체 정보</h2>
         <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-sm"><span className="text-gray-500">회사명:</span> {companyName}</p>
-          {companyAddress && (
-            <p className="text-sm mt-1"><span className="text-gray-500">주소:</span> {companyAddress}</p>
+          {job.source === 'crawled' ? (
+            <>
+              <div className="flex items-center gap-2 mb-2 text-sm text-amber-700 bg-amber-50 rounded-md px-3 py-2">
+                <span>🔗</span>
+                <span>이 공고는 외부 사이트에서 수집되었습니다</span>
+              </div>
+              {companyName && companyName !== 'K114 외부수집' && (
+                <p className="text-sm"><span className="text-gray-500">업체명:</span> {companyName}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-sm"><span className="text-gray-500">회사명:</span> {companyName}</p>
+              {companyAddress && (
+                <p className="text-sm mt-1"><span className="text-gray-500">주소:</span> {companyAddress}</p>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* 연락 버튼 (하단 고정) */}
+      {/* 연락 버튼 (하단 고정) - 크롤링 공고는 원문 보기 버튼 */}
       <div className="sticky bottom-0 bg-gray-50 py-4 -mx-4 px-4 border-t border-gray-200">
-        <ContactButtons phone={job.contact_phone} kakao={job.contact_kakao} />
+        {job.source === 'crawled' && job.source_url ? (
+          <div className="space-y-2">
+            <a
+              href={job.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              원문에서 확인하기 ↗
+            </a>
+            <p className="text-xs text-center text-gray-400">
+              연락처와 상세 내용은 원본 사이트에서 확인하세요
+            </p>
+          </div>
+        ) : (
+          <ContactButtons phone={job.contact_phone} kakao={job.contact_kakao} />
+        )}
       </div>
 
       {/* 메타 정보 */}

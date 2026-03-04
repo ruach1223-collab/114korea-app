@@ -12,16 +12,16 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: {
-    default: '114Korea - 외국인 근로자 구인구직',
-    template: '%s | 114Korea',
+    default: 'K114 - 외국인 근로자 구인구직',
+    template: '%s | K114',
   },
   description: '검증된 아웃소싱 업체의 안전한 일자리를 찾아보세요. 지역별, 업종별, 비자별 구인정보를 무료로 제공합니다.',
-  keywords: '외국인 구인구직, 114korea, 외국인 근로자, 아웃소싱, 구인, 구직, 일자리, E-9, F-4, H-2, 비자',
+  keywords: '외국인 구인구직, k114, 외국인 근로자, 아웃소싱, 구인, 구직, 일자리, E-9, F-4, H-2, 비자',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    siteName: '114Korea',
-    title: '114Korea - 외국인 근로자 구인구직',
+    siteName: 'K114',
+    title: 'K114 - 외국인 근로자 구인구직',
     description: '검증된 아웃소싱 업체의 안전한 일자리를 찾아보세요.',
   },
   robots: {

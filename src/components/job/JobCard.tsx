@@ -6,9 +6,31 @@ import { Badge } from '@/components/ui/Badge'
 
 type JobCardProps = {
   job: JobPostCard
+  compact?: boolean
 }
 
-export function JobCard({ job }: JobCardProps) {
+export function JobCard({ job, compact }: JobCardProps) {
+  if (compact) {
+    return (
+      <Link href={`/jobs/${job.id}`} className="block">
+        <div className="p-2.5 border border-amber-200 bg-amber-50/40 rounded-lg hover:shadow-sm transition-shadow">
+          <div className="flex items-center gap-2">
+            <span className="text-sm shrink-0">{INDUSTRY_ICONS[job.industry]}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <Badge variant="vip">VIP</Badge>
+                <h3 className="text-xs font-semibold text-gray-900 truncate">{job.title}</h3>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {job.company_name} · {job.region_city} · <span className="text-blue-600 font-medium">{formatSalary(job.salary_type, job.salary_amount)}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </Link>
+    )
+  }
+
   return (
     <Link href={`/jobs/${job.id}`} className="block">
       <div
