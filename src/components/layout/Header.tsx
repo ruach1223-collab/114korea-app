@@ -27,6 +27,7 @@ export function Header() {
           {/* 로고 */}
           <Link href="/" className="flex items-center gap-2">
             <span className="text-xl font-bold text-blue-600">K114</span>
+            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-medium text-green-700 bg-green-100 rounded">검증된 공고</span>
           </Link>
 
           {/* 데스크탑 메뉴 */}

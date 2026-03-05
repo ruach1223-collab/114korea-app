@@ -5,8 +5,9 @@ import Link from 'next/link'
 
 type Stats = {
   companies: { total: number; pending: number; approved: number; rejected: number }
-  jobs: { total: number; active: number; pending: number; hidden: number; expired: number; vip: number }
+  jobs: { total: number; active: number; pending: number; hidden: number; expired: number; vip: number; crawled: number }
   views: { total: number }
+  subscriptions: { total: number; active: number; cancelled: number; expired: number; monthlyRevenue: number }
 }
 
 export default function AdminDashboard() {
@@ -68,7 +69,24 @@ export default function AdminDashboard() {
           <StatCard label="심사 대기" value={stats.jobs.pending} color="yellow" highlight />
           <StatCard label="숨김 처리" value={stats.jobs.hidden} color="red" />
           <StatCard label="VIP 공고" value={stats.jobs.vip} color="amber" />
-          <StatCard label="총 조회수" value={stats.views.total} color="blue" />
+          <StatCard label="크롤링 공고" value={stats.jobs.crawled} color="blue" />
+          <StatCard label="총 조회수" value={stats.views.total} color="gray" />
+        </div>
+      </section>
+
+      {/* 구독 통계 */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-700">구독 현황</h2>
+          <Link href="/admin/subscriptions" className="text-xs text-blue-600 hover:underline">
+            관리하기 →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="전체 구독" value={stats.subscriptions?.total ?? 0} color="gray" />
+          <StatCard label="활성 구독" value={stats.subscriptions?.active ?? 0} color="green" />
+          <StatCard label="해지 예정" value={stats.subscriptions?.cancelled ?? 0} color="yellow" />
+          <StatCard label="월 수익" value={stats.subscriptions?.monthlyRevenue ?? 0} color="blue" />
         </div>
       </section>
 

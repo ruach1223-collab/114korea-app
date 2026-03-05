@@ -9,17 +9,23 @@ type JobListItemProps = {
 
 // 카페 게시판 스타일 줄 리스트 - 촘촘한 버전
 export function JobListItem({ job, highlight }: JobListItemProps) {
+  const isBoosted = job.is_boost
+
   return (
     <Link href={`/jobs/${job.id}`} className="block">
       <div className={`flex items-center gap-2 px-2 py-1.5 border-b transition-colors text-[13px] leading-tight ${
-        highlight
+        isBoosted
+          ? 'bg-red-50/60 border-red-200 hover:bg-red-50'
+          : highlight
           ? 'bg-amber-50/60 border-amber-100 hover:bg-amber-50'
           : 'border-gray-100 hover:bg-blue-50/40'
       }`}>
-        {/* 추천 뱃지 */}
-        {highlight && (
+        {/* 긴급/추천 뱃지 */}
+        {isBoosted ? (
+          <span className="text-[10px] font-bold text-red-600 w-6 shrink-0 text-center">긴급</span>
+        ) : highlight ? (
           <span className="text-[10px] font-bold text-amber-600 w-6 shrink-0 text-center">추천</span>
-        )}
+        ) : null}
 
         {/* 업종 */}
         <span className="text-[11px] text-gray-400 w-14 shrink-0 text-center hidden sm:block">
@@ -27,7 +33,7 @@ export function JobListItem({ job, highlight }: JobListItemProps) {
         </span>
 
         {/* 제목 */}
-        <span className={`flex-1 min-w-0 truncate ${highlight ? 'text-gray-900 font-medium' : 'text-gray-800'}`}>
+        <span className={`flex-1 min-w-0 truncate ${isBoosted ? 'text-red-800 font-semibold' : highlight ? 'text-gray-900 font-medium' : 'text-gray-800'}`}>
           {job.title}
         </span>
 

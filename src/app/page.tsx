@@ -14,13 +14,19 @@ export default async function HomePage() {
   return (
     <div>
       {/* 히어로 섹션 */}
-      <section className="bg-blue-600 text-white py-10 md:py-16">
+      <section className="bg-gradient-to-b from-blue-700 to-blue-600 text-white py-10 md:py-16">
         <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-500/20 border border-green-400/30 rounded-full text-green-200 text-xs font-medium mb-4">
+            <span>✓</span> 사업자등록 검증 업체만 등록 가능
+          </div>
           <h1 className="text-2xl md:text-4xl font-bold mb-3">
-            안전한 일자리, K114에서 찾으세요
+            검증된 공고만, K114
           </h1>
-          <p className="text-blue-100 text-sm md:text-base mb-6">
-            검증된 아웃소싱 업체의 구인정보를 무료로 확인하세요
+          <p className="text-blue-100 text-sm md:text-base mb-2">
+            사업자등록번호 확인된 업체의 구인정보만 제공합니다
+          </p>
+          <p className="text-blue-200/70 text-xs mb-6">
+            허위 공고 ZERO — 관리자 승인 후 공개
           </p>
 
           {/* 빠른 필터 - 지역 */}
@@ -47,6 +53,30 @@ export default async function HomePage() {
                 {INDUSTRY_ICONS[code]} {label}
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 신뢰 지표 */}
+      <section className="bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-6 md:gap-10 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span>
+              <span>사업자등록 검증</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span>
+              <span>관리자 승인제</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span>
+              <span>허위공고 즉시삭제</span>
+            </div>
+            <div className="hidden md:flex items-center gap-1.5">
+              <span className="text-green-500 font-bold">✓</span>
+              <span>무료 열람</span>
+            </div>
           </div>
         </div>
       </section>

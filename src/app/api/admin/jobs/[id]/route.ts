@@ -22,7 +22,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ message: '공고를 찾을 수 없습니다' }, { status: 404 })
   }
 
-  const updates: { status?: string; is_vip?: boolean } = {}
+  const updates: { status?: string; is_vip?: boolean; is_boost?: boolean; boost_expires_at?: string | null } = {}
 
   // 상태 변경
   if (body.status) {
@@ -36,6 +36,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   // VIP 토글
   if (typeof body.is_vip === 'boolean') {
     updates.is_vip = body.is_vip
+  }
+
+  // 긴급채용 부스트 토글 (24시간 유효)
+  if (typeof body.is_boost === 'boolean') {
+    updates.is_boost = body.is_boost
+    updates.boost_expires_at = body.is_boost
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      : null
   }
 
   const updatedJob = await updateJobAdmin(id, updates)

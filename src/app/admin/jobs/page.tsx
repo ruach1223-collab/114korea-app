@@ -28,17 +28,19 @@ export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<AdminJob[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState(searchParams.get('status') || '')
+  const [sourceFilter, setSourceFilter] = useState(searchParams.get('source') || '')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchJobs = useCallback(async () => {
     setLoading(true)
     const params = new URLSearchParams()
     if (filter) params.set('status', filter)
+    if (sourceFilter) params.set('source', sourceFilter)
     const res = await fetch(`/api/admin/jobs?${params}`)
     const data = await res.json()
     setJobs(data.data ?? [])
     setLoading(false)
-  }, [filter])
+  }, [filter, sourceFilter])
 
   useEffect(() => {
     fetchJobs()
@@ -72,6 +74,20 @@ export default function AdminJobsPage() {
     }
   }
 
+  const handleBoostToggle = async (jobId: string, currentBoost: boolean) => {
+    setActionLoading(jobId)
+    try {
+      const res = await fetch(`/api/admin/jobs/${jobId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_boost: !currentBoost }),
+      })
+      if (res.ok) await fetchJobs()
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const handleDelete = async (jobId: string) => {
     if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
     setActionLoading(jobId)
@@ -85,8 +101,8 @@ export default function AdminJobsPage() {
 
   return (
     <div>
-      {/* 필터 */}
-      <div className="flex gap-2 mb-4 flex-wrap">
+      {/* 상태 필터 */}
+      <div className="flex gap-2 mb-2 flex-wrap">
         {(['', 'active', 'pending', 'hidden', 'expired'] as const).map((status) => (
           <button
             key={status}
@@ -98,6 +114,27 @@ export default function AdminJobsPage() {
             }`}
           >
             {status === '' ? '전체' : STATUS_LABELS[status]}
+          </button>
+        ))}
+      </div>
+
+      {/* 출처 필터 */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {([
+          { value: '', label: '전체 출처' },
+          { value: 'organic', label: '직접등록' },
+          { value: 'crawled', label: '크롤링' },
+        ]).map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setSourceFilter(value)}
+            className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+              sourceFilter === value
+                ? 'bg-amber-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {label}
           </button>
         ))}
       </div>
@@ -120,7 +157,7 @@ export default function AdminJobsPage() {
             <div
               key={job.id}
               className={`bg-white border rounded-lg p-4 ${
-                job.is_vip ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'
+                job.is_boost ? 'border-red-300 bg-red-50/30' : job.is_vip ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -128,7 +165,10 @@ export default function AdminJobsPage() {
                   {/* 제목 + 상태 */}
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     {job.is_vip && (
-                      <span className="px-1.5 py-0.5 text-xs font-bold bg-amber-400 text-amber-900 rounded">VIP</span>
+                      <span className="px-1.5 py-0.5 text-xs font-bold bg-amber-400 text-amber-900 rounded" title="VIP 상단노출">VIP</span>
+                    )}
+                    {job.is_boost && (
+                      <span className="px-1.5 py-0.5 text-xs font-bold bg-red-500 text-white rounded" title="긴급채용 부스트">긴급</span>
                     )}
                     <Link
                       href={`/jobs/${job.id}`}
@@ -198,6 +238,17 @@ export default function AdminJobsPage() {
                     className={job.is_vip ? '' : 'border border-amber-300 text-amber-700'}
                   >
                     {job.is_vip ? 'VIP 해제' : 'VIP 지정'}
+                  </Button>
+
+                  {/* 긴급채용 부스트 토글 */}
+                  <Button
+                    size="sm"
+                    variant={job.is_boost ? 'danger' : 'ghost'}
+                    onClick={() => handleBoostToggle(job.id, job.is_boost)}
+                    loading={actionLoading === job.id}
+                    className={job.is_boost ? '' : 'border border-red-300 text-red-600'}
+                  >
+                    {job.is_boost ? '긴급 해제' : '긴급 부스트'}
                   </Button>
 
                   {/* 삭제 */}

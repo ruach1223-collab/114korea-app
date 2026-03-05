@@ -54,7 +54,16 @@ export default async function DashboardPage() {
 
       {/* 승인된 업체 - 공고 관리 */}
       {user.company?.status === 'approved' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Link
+            href="/dashboard/subscription"
+            className="p-6 bg-amber-50 border border-amber-300 rounded-lg hover:bg-amber-100 transition-colors text-center"
+          >
+            <span className="text-2xl block mb-2">👑</span>
+            <p className="font-medium text-amber-700">VIP 구독</p>
+            <p className="text-xs text-amber-500 mt-1">월 10만원 · 상단고정노출</p>
+          </Link>
+
           <Link
             href="/dashboard/jobs/new"
             className="p-6 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-center"

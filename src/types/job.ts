@@ -76,6 +76,8 @@ export type JobPost = {
   contact_phone: string
   contact_kakao: string
   is_vip: boolean
+  is_boost: boolean
+  boost_expires_at?: string
   status: JobStatus
   view_count: number
   source: JobSource
@@ -96,6 +98,7 @@ export type JobPostCard = {
   salary_amount: number
   tags: JobTag[]
   is_vip: boolean
+  is_boost: boolean
   created_at: string
 }
 

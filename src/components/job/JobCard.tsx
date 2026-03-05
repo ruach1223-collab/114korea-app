@@ -35,7 +35,9 @@ export function JobCard({ job, compact }: JobCardProps) {
     <Link href={`/jobs/${job.id}`} className="block">
       <div
         className={`p-4 border rounded-lg hover:shadow-md transition-shadow ${
-          job.is_vip
+          job.is_boost
+            ? 'border-red-300 bg-red-50/50'
+            : job.is_vip
             ? 'border-amber-300 bg-amber-50/50'
             : 'border-gray-200 bg-white'
         }`}
@@ -48,6 +50,7 @@ export function JobCard({ job, compact }: JobCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               {job.is_vip && <Badge variant="vip">VIP</Badge>}
+              {job.is_boost && <Badge variant="danger">긴급</Badge>}
               <h3 className="text-sm font-semibold text-gray-900 truncate">
                 {job.title}
               </h3>

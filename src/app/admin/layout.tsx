@@ -9,6 +9,7 @@ const adminNav = [
   { href: '/admin', label: '대시보드', icon: '📊' },
   { href: '/admin/companies', label: '업체 관리', icon: '🏢' },
   { href: '/admin/jobs', label: '공고 관리', icon: '📋' },
+  { href: '/admin/subscriptions', label: '구독 관리', icon: '👑' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

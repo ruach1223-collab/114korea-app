@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   const data = await getAllJobs({
     status: searchParams.get('status') || undefined,
     vip: searchParams.get('vip') || undefined,
+    source: searchParams.get('source') || undefined,
   })
 
   return NextResponse.json({ data })

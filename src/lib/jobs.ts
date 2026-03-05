@@ -64,12 +64,13 @@ export async function getActiveJobs(filters: {
   // 데이터 쿼리
   let dataQuery = applyFilters(
     supabase.from('jobs').select(
-      'id, title, company_id, industry, region_city, region_district, salary_type, salary_amount, tags, is_vip, created_at',
+      'id, title, company_id, industry, region_city, region_district, salary_type, salary_amount, tags, is_vip, is_boost, created_at',
     ),
   )
 
-  // 정렬: VIP 먼저
+  // 정렬: VIP 먼저 → 부스트 → 일반
   dataQuery = dataQuery.order('is_vip', { ascending: false })
+  dataQuery = dataQuery.order('is_boost', { ascending: false })
   if (filters.sort === 'salary_high') {
     dataQuery = dataQuery.order('salary_amount', { ascending: false })
   } else if (filters.sort === 'salary_low') {
@@ -100,6 +101,7 @@ export async function getActiveJobs(filters: {
     salary_amount: job.salary_amount as number,
     tags: job.tags as JobTag[],
     is_vip: job.is_vip as boolean,
+    is_boost: job.is_boost as boolean,
     created_at: job.created_at as string,
   }))
 
@@ -270,7 +272,7 @@ export async function incrementViewCount(id: string) {
 
 // === 관리자: 공고 상태/VIP 변경 ===
 
-export async function updateJobAdmin(id: string, updates: { status?: string; is_vip?: boolean }) {
+export async function updateJobAdmin(id: string, updates: { status?: string; is_vip?: boolean; is_boost?: boolean; boost_expires_at?: string | null }) {
   const supabase = createServerClient()
   const { data, error } = await supabase
     .from('jobs')
@@ -328,7 +330,7 @@ export async function getJobStats() {
 export async function getHomePageData() {
   const supabase = createServerClient()
   const now = new Date().toISOString()
-  const fields = 'id, title, company_id, industry, region_city, region_district, salary_type, salary_amount, tags, is_vip, created_at'
+  const fields = 'id, title, company_id, industry, region_city, region_district, salary_type, salary_amount, tags, is_vip, is_boost, created_at'
 
   // VIP 공고 + 부족분 채우기 위해 일반 공고를 넉넉히 가져옴
   const PREMIUM_COUNT = 8
@@ -380,6 +382,7 @@ export async function getHomePageData() {
     salary_amount: job.salary_amount as number,
     tags: job.tags as JobTag[],
     is_vip: job.is_vip as boolean,
+    is_boost: job.is_boost as boolean,
     created_at: job.created_at as string,
   })
 

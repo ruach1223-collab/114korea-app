@@ -53,6 +53,8 @@ CREATE TABLE jobs (
   contact_phone TEXT NOT NULL,
   contact_kakao TEXT NOT NULL DEFAULT '',
   is_vip BOOLEAN NOT NULL DEFAULT FALSE,
+  is_boost BOOLEAN NOT NULL DEFAULT FALSE,
+  boost_expires_at TIMESTAMPTZ,
   status TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'active', 'hidden', 'expired')),
   view_count INTEGER NOT NULL DEFAULT 0,
@@ -71,6 +73,7 @@ CREATE INDEX idx_jobs_company_id ON jobs(company_id);
 CREATE INDEX idx_jobs_industry ON jobs(industry);
 CREATE INDEX idx_jobs_region_city ON jobs(region_city);
 CREATE INDEX idx_jobs_is_vip ON jobs(is_vip);
+CREATE INDEX idx_jobs_is_boost ON jobs(is_boost) WHERE is_boost = TRUE;
 CREATE INDEX idx_jobs_created_at ON jobs(created_at DESC);
 CREATE INDEX idx_companies_status ON companies(status);
 CREATE INDEX idx_jobs_source_url ON jobs(source_url) WHERE source_url IS NOT NULL;

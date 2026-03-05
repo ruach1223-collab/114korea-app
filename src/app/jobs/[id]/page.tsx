@@ -81,11 +81,11 @@ export default async function JobDetailPage({ params }: PageProps) {
               <Badge variant="default">외부수집</Badge>
             </>
           ) : (
-            <>
+            <span className="flex items-center gap-1.5 flex-wrap">
               {companyName}
-              <span className="mx-1">·</span>
-              <Badge variant="success">검증업체</Badge>
-            </>
+              <span className="mx-0.5">·</span>
+              <Badge variant="success">✓ 사업자등록 검증</Badge>
+            </span>
           )}
         </p>
       </div>
